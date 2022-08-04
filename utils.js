@@ -13,14 +13,8 @@ exports.isObjEmpty = (obj) => {
     return Object.keys(obj).length === 0
 }
 
-exports.strToPositiveInt = (str) => {
-    if (!str) { return NaN }
-    let int = Math.abs(parseInt(str, 10))
-    if (isNaN(int)) { return NaN }
-    return int
-}
-
 exports.isYearValid = (year) => {
+    if (typeof year !== 'string') { return false }
     if (year.length !== 4) { return false }
     return this.isStringAnInteger(year)
 }
@@ -30,11 +24,13 @@ exports.isMakeValid = (make) => {
 }
 
 exports.isModelValid = (model) => {
+    if (typeof model !== 'string') { return false }
     if (model.length > 40 || model.length < 1) { return false }
     return true
 }
 
 exports.isEngineValid = (engine) => {
+    if (typeof engine !== 'string') { return false }
     if (engine.length > 5 || engine.length < 4) { return false }
     if (!engine.includes('.')) { return false }
     if (!engine.includes('L')) { return false }
@@ -47,6 +43,7 @@ exports.isConditionValid = (condition) => {
 }
 
 exports.isCommentsValid = (comments) => {
+    if (typeof comments !== 'string') { return false }
     if (comments.length > 300) { return false }
     return true
 }
@@ -64,6 +61,12 @@ exports.isTempUnitsValid = (tempUnits) => {
 exports.isElevationUnitsValid = (elevationUnits) => {
     let validUnits = ['ft', 'm']
     return validUnits.includes(elevationUnits)
+}
+
+exports.isKeywordValid = (keyword) => {
+    if (typeof keyword !== 'string') { return false }
+    if (keyword.length < 1 || keyword.length > 50) { return false }
+    return true
 }
 
 exports.isStringAnInteger = (string) => {
