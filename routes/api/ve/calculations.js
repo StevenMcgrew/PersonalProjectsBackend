@@ -5,19 +5,31 @@ const { db, pgp } = require('../../../shared-db')
 const PQ = pgp.ParameterizedQuery
 
 
-// Expects query string in URL '?limit= '
-// Max allowed is limit=100
+// Query string parameters are optional (returns most recent 100 records if no query parameters)
+// The following queary string parameters are allowed:
+// ?year=2008&make=Ford&model=Taurus&engine=3.0L&condition=Good&keyword1=starter&keyword2=battery&keyword3=cable
 router.get('', async (req, res, next) => {
     try {
-        let limit = req.query.limit
-        limit = utils.strToPositiveInt(limit)
+        let q = req.query
+        let pQuery = 'SELECT * FROM calculations'
 
-        if (isNaN(limit)) { res.status(400).send("Problem with query string. Query string should be similar to this:  '?limit=20'"); return; }
-        if (limit === 0) { res.sendStatus(200); return; }
-        if (limit > 100) { limit = 100 }
+        let filters = []
+        if (utils.isYearValid(q.year)) { filters.push(pgp.as.format('year = $1', q.year)) }
+        if (utils.isMakeValid(q.make)) { filters.push(pgp.as.format('make = $1', q.make)) }
+        if (utils.isModelValid(q.model)) { filters.push(pgp.as.format('model = $1', q.model)) }
+        if (utils.isEngineValid(q.engine)) { filters.push(pgp.as.format('engine = $1', q.engine)) }
+        if (utils.isConditionValid(q.condition)) { filters.push(pgp.as.format('condition = $1', q.condition)) }
+        if (utils.isKeywordValid(q.keyword1)) { filters.push(pgp.as.format('comments ILIKE $1', `%${q.keyword1}%`)) }
+        if (utils.isKeywordValid(q.keyword2)) { filters.push(pgp.as.format('comments ILIKE $1', `%${q.keyword2}%`)) }
+        if (utils.isKeywordValid(q.keyword3)) { filters.push(pgp.as.format('comments ILIKE $1', `%${q.keyword3}%`)) }
+        if (filters.length) { pQuery = `${pQuery} WHERE ${filters.join(' AND ')}` }
 
-        let pQuery = new PQ({ text: 'SELECT * FROM calculations ORDER BY id DESC LIMIT $1',
-                              values: [limit] })
+        pQuery += ' ORDER BY id DESC'
+        
+        let limit = Math.abs(parseInt(q.limit))
+        if (isNaN(limit) || limit > 100) { limit = 100 }
+        pQuery += pgp.as.format(' LIMIT $1', limit)
+
         let records = await db.query(pQuery)
         res.json(records)
     } catch (err) {
@@ -56,11 +68,11 @@ router.post('', async (req, res, next) => {
         if (!utils.isMafUnitsValid(b.maf_units)) { res.status(400).send("Invalid maf_units detected in JSON data."); return; }
         if (!utils.isTempUnitsValid(b.temp_units)) { res.status(400).send("Invalid temp_units detected in JSON data."); return; }
         if (!utils.isElevationUnitsValid(b.elevation_units)) { res.status(400).send("Invalid elevation_units detected in JSON data."); return; }
-        if (!(typeof b.rpm === 'number')) { res.status(400).send("Invalid rpm detected in JSON data."); return; }
-        if (!(typeof b.maf === 'number')) { res.status(400).send("Invalid maf detected in JSON data."); return; }
-        if (!(typeof b.air_temp === 'number')) { res.status(400).send("Invalid air_temp detected in JSON data."); return; }
-        if (!(typeof b.elevation === 'number')) { res.status(400).send("Invalid elevation detected in JSON data."); return; }
-        if (!(typeof b.ve === 'number')) { res.status(400).send("Invalid volumetric efficiency detected in JSON data."); return; }
+        if (typeof b.rpm !== 'number') { res.status(400).send("Invalid rpm detected in JSON data."); return; }
+        if (typeof b.maf !== 'number') { res.status(400).send("Invalid maf detected in JSON data."); return; }
+        if (typeof b.air_temp !== 'number') { res.status(400).send("Invalid air_temp detected in JSON data."); return; }
+        if (typeof b.elevation !== 'number') { res.status(400).send("Invalid elevation detected in JSON data."); return; }
+        if (typeof b.ve !== 'number') { res.status(400).send("Invalid volumetric efficiency detected in JSON data."); return; }
 
         let pQuery = new PQ({ text: `INSERT INTO calculations (year, make, model, engine, condition, comments, maf_units, temp_units, elevation_units, rpm, maf, air_temp, elevation, ve)
                                      VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id;`,
