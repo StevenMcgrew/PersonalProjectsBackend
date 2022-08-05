@@ -53,7 +53,7 @@ router.get('', async (req, res, next) => {
 //     "maf": 150.0,
 //     "air_temp": 76,
 //     "elevation": 1200,
-//     "ve": 96,
+//     "ve": 96
 // }
 router.post('', async (req, res, next) => {
     try {
