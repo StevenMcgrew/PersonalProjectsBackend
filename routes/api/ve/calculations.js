@@ -15,8 +15,8 @@ router.get('', async (req, res, next) => {
 
         let filters = []
         if (utils.isYearValid(q.year)) { filters.push(pgp.as.format('year = $1', q.year)) }
-        if (utils.isMakeValid(q.make)) { filters.push(pgp.as.format('make = $1', q.make)) }
-        if (utils.isModelValid(q.model)) { filters.push(pgp.as.format('model = $1', q.model)) }
+        if (utils.isMakeValid(q.make)) { filters.push(pgp.as.format('make ILIKE $1', q.make)) }
+        if (utils.isModelValid(q.model)) { filters.push(pgp.as.format('model ILIKE $1', q.model)) }
         if (utils.isEngineValid(q.engine)) { filters.push(pgp.as.format('engine = $1', q.engine)) }
         if (utils.isConditionValid(q.condition)) { filters.push(pgp.as.format('condition = $1', q.condition)) }
         if (utils.isKeywordValid(q.keyword1)) { filters.push(pgp.as.format('comments ILIKE $1', `%${q.keyword1}%`)) }
