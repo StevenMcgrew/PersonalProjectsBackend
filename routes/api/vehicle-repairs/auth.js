@@ -1,35 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const utils = require('../../../utils');
-const { db, pgp } = require('../../../shared-db');
-const PQ = pgp.ParameterizedQuery;
 const bcrypt = require('bcryptjs');
+const sharedDB = require('../../../shared-db');
+const { db, pgp } = sharedDB.connect('vehicle_repairs');
+const PQ = pgp.ParameterizedQuery;
 
 
 /*********************************************************************
-Utility functions for auth routes
+Function to get user
 **********************************************************************/
-const isEmailAvailable = async (email) => {
+const getUserBy = async (field, value) => {
     try {
         const pq = new PQ({
-            text: `SELECT id FROM users WHERE email = $1 LIMIT 1`,
-            values: [req.query.email]
+            text: `SELECT * FROM users WHERE ${field} = $1 LIMIT 1`,
+            values: [value]
         });
-        const records = await db.query(pq);
-        return records.length ? false : true;
-    } catch (error) {
-        return error;
-    }
-};
-
-const isUsernameAvailable = async (username) => {
-    try {
-        const pq = new PQ({
-            text: `SELECT id FROM users WHERE username = $1 LIMIT 1`,
-            values: [req.query.username]
-        });
-        const records = await db.query(pq);
-        return records.length ? false : true;
+        let arr = await db.query(pq);
+        return arr.length ? arr[0] : null;
     } catch (error) {
         return error;
     }
@@ -39,9 +27,11 @@ const isUsernameAvailable = async (username) => {
 /*********************************************************************
 Check email availability. Query param:  ?email=
 **********************************************************************/
-router.get('/users/email/availability', async (req, res, next) => {
+router.get('/email/availability', async (req, res, next) => {
     try {
-        res.json(`{ "isAvailable": ${isEmailAvailable(req.query.email)} }`);
+        if (!req.query.email) { res.statusMessage = 'Email must be provided as a query parameter.'; res.status(400).end(); return; }
+        const user = await getUserBy('email', req.query.email);
+        res.json({ isAvailable: (user ? false : true) });
     } catch (error) {
         next(error);
     }
@@ -51,9 +41,11 @@ router.get('/users/email/availability', async (req, res, next) => {
 /*********************************************************************
 Check username availability. Query param:  ?username=
 **********************************************************************/
-router.get('/users/username/availability', async (req, res, next) => {
+router.get('/username/availability', async (req, res, next) => {
     try {
-        res.json(`{ "isAvailable": ${isUsernameAvailable(req.query.username)} }`);
+        if (!req.query.username) { res.statusMessage = 'Username must be provided as a query parameter.'; res.status(400).end(); return; }
+        const user = await getUserBy('username', req.query.username);
+        res.json({ isAvailable: (user ? false : true) });
     } catch (error) {
         next(error);
     }
@@ -61,9 +53,9 @@ router.get('/users/username/availability', async (req, res, next) => {
 
 
 /*********************************************************************
-Sign up new user. Request body:  { email, username, password }
+Sign up. Request body:  { email, username, password }
 **********************************************************************/
-router.post('/users', async (req, res, next) => {
+router.post('/signup', async (req, res, next) => {
     try {
         const { email, username, password } = req.body;
         let errors = 'The server detected the following problems:  ';
@@ -74,14 +66,12 @@ router.post('/users', async (req, res, next) => {
         errors += utils.isPasswordValid(password) ? '' : 'Invalid Password. ';
 
         // Check availability
-        errors += isEmailAvailable(email) ? '' : 'That email address is already in use.';
-        errors += isUsernameAvailable(username) ? '' : 'That username is already taken.';
+        let userByEmail = await getUserBy('email', email);
+        errors += userByEmail.length ? '' : 'That email address is already in use.';
+        let userByUsername = await getUserBy('username', username);
+        errors += userByUsername ? '' : 'That username is already taken.';
 
-        if (errors) {
-            res.statusMessage = errors;
-            res.status(400).end();
-            return;
-        }
+        if (errors) { res.statusMessage = errors; res.status(400).end(); return; }
 
         // Hash password (password must be of type String)
         const hash = await bcrypt.hash(password, 10);
@@ -92,9 +82,57 @@ router.post('/users', async (req, res, next) => {
             values: [email, username, hash]
         });
         const recordId = await db.query(pq);
+        req.session.user_id = recordId;
         res.json(recordId);
     } catch (err) {
         next(err);
+    }
+});
+
+
+/*********************************************************************
+Log in. Request body:  { email, password }
+**********************************************************************/
+router.post('/login', async (req, res, next) => {
+    try {
+        let { email, password } = req.body;
+
+        // Get user
+        let user = await getUserBy('email', email);
+        if (user.warning)
+            if (!user.length) { res.statusMessage = 'Email and/or password incorrect.'; res.status(400).end(); return; }
+
+        // Check status
+        if (user.status !== 'active') { res.statusMessage = `Cannot log in to that account. The account status is: ${user.status}.`; res.status(400).end(); return; }
+
+        // Check password
+        let isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) { res.statusMessage = 'Email and/or password incorrect.'; res.status(400).end(); return; }
+
+        // Create new session and return user data
+        req.session.user_id = user.id;
+        res.json({
+            username: user.username,
+            view_history: user.view_history,
+            profile_pic: user.profile_pic,
+            theme: user.theme
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+/*********************************************************************
+Log out. 
+**********************************************************************/
+router.delete('/logout', async (req, res, next) => {
+    try {
+        req.session = null;
+        res.sendStatus(200);
+    } catch (error) {
+        next(error);
     }
 });
 
@@ -110,4 +148,4 @@ router.post('/users', async (req, res, next) => {
 //     }
 // });
 
-module.exports = router;
+module.exports = router; 
