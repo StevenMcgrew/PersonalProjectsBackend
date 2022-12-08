@@ -8,8 +8,9 @@ let cors = require('cors');
 
 // Import routes
 let indexRouter = require('./routes/index');
-let apiVeCalculations = require('./routes/api/ve/calculations');
-let apiVehicleRepairsAuth = require('./routes/api/vehicle-repairs/auth');
+const veCalculationsRouter = require('./routes/api/ve/calculations');
+const vehicleRepairsAuthRouter = require('./routes/api/vehicle-repairs/auth');
+const vehicleRepairsPostsRouter = require('./routes/api/vehicle-repairs/posts');
 
 let app = express();
 
@@ -30,8 +31,9 @@ app.use(cookieSession({
 
 // Register routes
 app.use('/', indexRouter);
-app.use('/api/ve/calculations', apiVeCalculations);
-app.use('/api/vehicle-repairs/auth', apiVehicleRepairsAuth);
+app.use('/api/ve/calculations', veCalculationsRouter);
+app.use('/api/vehicle-repairs/auth', vehicleRepairsAuthRouter);
+app.use('/api/vehicle-repairs/posts', vehicleRepairsPostsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

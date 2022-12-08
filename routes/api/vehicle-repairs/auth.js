@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const utils = require('../../../utils');
+const { isEmailValid, isUsernameValid, isPasswordValid } = require('../../../utils');
 const bcrypt = require('bcryptjs');
-const sharedDB = require('../../../shared-db');
-const { db, pgp } = sharedDB.connect('vehicle_repairs');
+const { vehicleRepairsDatabase } = require('../../../shared-db');
+const { db, pgp } = vehicleRepairsDatabase;
 const PQ = pgp.ParameterizedQuery;
 
 
@@ -16,7 +16,7 @@ const getUserBy = async (field, value) => {
             text: `SELECT * FROM users WHERE ${field} = $1 LIMIT 1`,
             values: [value]
         });
-        let arr = await db.query(pq);
+        const arr = await db.query(pq);
         return arr.length ? arr[0] : null;
     } catch (error) {
         return error;
@@ -29,23 +29,29 @@ Sign up. Request body:  { email, username, password }
 **********************************************************************/
 router.post('/signup', async (req, res, next) => {
     try {
-        const { email, username, password } = req.body;
-        let errors = '';
+        let { email, username, password } = req.body;
+
+        // Make sure inputs are strings, otherwise errors occur
+        email = email.toString().trim();
+        username = username.toString().trim();
+        password = password.toString();
+
+        let warning = '';
 
         // Validate inputs
-        errors += utils.isEmailValid(email) ? '' : 'Invalid email address. ';
-        errors += utils.isUsernameValid(username) ? '' : 'Invalid Username. ';
-        errors += utils.isPasswordValid(password) ? '' : 'Invalid Password. ';
+        warning += isEmailValid(email) ? '' : 'Invalid email address. ';
+        warning += isUsernameValid(username) ? '' : 'Invalid Username. ';
+        warning += isPasswordValid(password) ? '' : 'Invalid Password. ';
 
         // Check availability
-        let userByEmail = await getUserBy('email', email);
-        errors += userByEmail.length ? '' : 'That email address is already in use. ';
-        let userByUsername = await getUserBy('username', username);
-        errors += userByUsername ? '' : 'That username is already taken.';
+        const userByEmail = await getUserBy('email', email);
+        warning += userByEmail ? 'That email address is already in use. ' : '';
+        const userByUsername = await getUserBy('username', username);
+        warning += userByUsername ? 'That username is already taken.' : '';
 
-        if (errors) { res.statusMessage = errors; res.status(400).end(); return; }
+        if (warning) { res.status(400).json({ warning }); return; }
 
-        // Hash password (password must be of type String)
+        // Hash password
         const hash = await bcrypt.hash(password, 10);
 
         //Save new user
@@ -54,8 +60,9 @@ router.post('/signup', async (req, res, next) => {
             values: [email, username, hash]
         });
         const recordId = await db.query(pq);
-        req.session.user_id = recordId;
-        res.json(recordId);
+        req.session.userId = recordId[0].id;
+        res.json(recordId[0]);
+
     } catch (err) {
         next(err);
     }
@@ -69,20 +76,23 @@ router.post('/login', async (req, res, next) => {
     try {
         let { email, password } = req.body;
 
-        // Get user
-        let user = await getUserBy('email', email);
-        if (user.warning)
-            if (!user.length) { res.statusMessage = 'Email and/or password incorrect.'; res.status(400).end(); return; }
+        // Make sure inputs are strings, otherwise errors occur
+        email = email.toString().trim();
+        password = password.toString();
 
-        // Check status
-        if (user.status !== 'active') { res.statusMessage = `Cannot log in to that account. The account status is: ${user.status}.`; res.status(400).end(); return; }
+        // Get user
+        const user = await getUserBy('email', email);
+        if (!user) { res.status(400).json({ warning: 'Email and/or password incorrect.' }); return; }
+
+        // Check status 
+        if (user.status !== 'active') { res.status(400).json({ warning: `Cannot log in to that account. The account status is: ${user.status}.` }); return; }
 
         // Check password
-        let isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) { res.statusMessage = 'Email and/or password incorrect.'; res.status(400).end(); return; }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) { res.status(400).json({ warning: 'Email and/or password incorrect.' }); return; }
 
         // Create new session and return user data
-        req.session.user_id = user.id;
+        req.session.userId = user.id;
         res.json({
             username: user.username,
             view_history: user.view_history,
@@ -110,14 +120,6 @@ router.delete('/logout', async (req, res, next) => {
 
 
 /*********************************************************************
-
+Export router
 **********************************************************************/
-// router.get('/', async (req, res, next) => {
-//     try {
-
-//     } catch (error) {
-//         next(error)
-//     }
-// });
-
-module.exports = router; 
+module.exports = router;

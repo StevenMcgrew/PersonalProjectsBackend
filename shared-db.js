@@ -1,26 +1,31 @@
 const pgp = require('pg-promise')();
 
-exports.connect = (dbName) => {
-    let conn = '';
-    if (process.env.NODE_ENV === 'development') {
-        conn = process.env.DEV_DB_BASE_URL;
-    }
-    else {
-        conn = process.env.PROD_DB_BASE_URL;
-    }
-    conn += dbName;
 
-    const db = pgp(conn);
-    return { db, pgp };
-};
+/*********************************************************************
+Export ve database
+**********************************************************************/
+let veConn = '';
+if (process.env.NODE_ENV === 'development') {
+    veConn = process.env.DEV_DB_BASE_URL + 've';
+} else {
+    veConn = process.env.PROD_DB_BASE_URL + 've';
+}
+console.log(typeof ('TYPE: ', veConn));
+console.log('CONN: ', veConn);
+const veDB = pgp(veConn);
+exports.veDatabase = { db: veDB, pgp };
 
-// let conn = '';
-// if (process.env.NODE_ENV === 'development') {
-//     conn = process.env.LOCAL_DB_URL;
-// } else {
-//     conn = process.env.DATABASE_URL;
-// }
 
-// const db = pgp(conn);
-
-// module.exports = { db, pgp };
+/*********************************************************************
+Export vehicle_repairs database
+**********************************************************************/
+let vehicleRepairsConn = '';
+if (process.env.NODE_ENV === 'development') {
+    vehicleRepairsConn = process.env.DEV_DB_BASE_URL + 'vehicle_repairs';
+} else {
+    vehicleRepairsConn = process.env.PROD_DB_BASE_URL + 'vehicle_repairs';
+}
+console.log(typeof ('TYPE: ', vehicleRepairsConn));
+console.log('CONN: ', vehicleRepairsConn);
+const vehicleRepairsDB = pgp(vehicleRepairsConn);
+exports.vehicleRepairsDatabase = { db: vehicleRepairsDB, pgp };

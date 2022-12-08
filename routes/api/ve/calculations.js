@@ -1,8 +1,8 @@
-let express = require('express');
-let router = express.Router();
-let utils = require('../../../utils');
-const sharedDB = require('../../../shared-db');
-const { db, pgp } = sharedDB.connect('ve');
+const express = require('express');
+const router = express.Router();
+const utils = require('../../../utils');
+const { veDatabase } = require('../../../shared-db');
+const { db, pgp } = veDatabase;
 const PQ = pgp.ParameterizedQuery;
 
 
