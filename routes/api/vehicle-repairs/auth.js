@@ -25,40 +25,12 @@ const getUserBy = async (field, value) => {
 
 
 /*********************************************************************
-Check email availability. Query param:  ?email=
-**********************************************************************/
-router.get('/email/availability', async (req, res, next) => {
-    try {
-        if (!req.query.email) { res.statusMessage = 'Email must be provided as a query parameter.'; res.status(400).end(); return; }
-        const user = await getUserBy('email', req.query.email);
-        res.json({ isAvailable: (user ? false : true) });
-    } catch (error) {
-        next(error);
-    }
-});
-
-
-/*********************************************************************
-Check username availability. Query param:  ?username=
-**********************************************************************/
-router.get('/username/availability', async (req, res, next) => {
-    try {
-        if (!req.query.username) { res.statusMessage = 'Username must be provided as a query parameter.'; res.status(400).end(); return; }
-        const user = await getUserBy('username', req.query.username);
-        res.json({ isAvailable: (user ? false : true) });
-    } catch (error) {
-        next(error);
-    }
-});
-
-
-/*********************************************************************
 Sign up. Request body:  { email, username, password }
 **********************************************************************/
 router.post('/signup', async (req, res, next) => {
     try {
         const { email, username, password } = req.body;
-        let errors = 'The server detected the following problems:  ';
+        let errors = '';
 
         // Validate inputs
         errors += utils.isEmailValid(email) ? '' : 'Invalid email address. ';
@@ -67,7 +39,7 @@ router.post('/signup', async (req, res, next) => {
 
         // Check availability
         let userByEmail = await getUserBy('email', email);
-        errors += userByEmail.length ? '' : 'That email address is already in use.';
+        errors += userByEmail.length ? '' : 'That email address is already in use. ';
         let userByUsername = await getUserBy('username', username);
         errors += userByUsername ? '' : 'That username is already taken.';
 
