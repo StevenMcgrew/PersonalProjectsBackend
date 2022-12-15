@@ -19,6 +19,7 @@ CREATE TABLE posts (
     repair_steps TEXT,
     thumbnail TEXT,
     is_published BOOLEAN NOT NULL DEFAULT false,
+    is_featured BOOLEAN NOT NULL DEFAULT false,
     user_id INT NOT NULL,
     vehicle_id INT NOT NULL,
     created_on TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -1,4 +1,4 @@
-let validCarMakes = ['Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley',
+const validCarMakes = ['Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley',
     'BMW', 'Bugatti', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler',
     'Citroen', 'Daewoo', 'Daihatsu', 'Dodge', 'Eagle', 'Ferrari',
     'Fiat', 'Ford', 'Freightliner', 'Geo', 'GMC', 'Honda', 'Hummer',
@@ -17,6 +17,14 @@ exports.isYearValid = (year) => {
     if (typeof year !== 'string') { return false; }
     if (year.length !== 4) { return false; }
     return this.isStringAnInteger(year);
+};
+
+exports.isIntYearValid = (year) => {
+    if (typeof year !== 'number') { return false; }
+    if (!Number.isInteger(year)) { return false; }
+    if (Math.sign(year) !== 1) { return false; }
+    if (year.toString().length !== 4) { return false; }
+    return true;
 };
 
 exports.isMakeValid = (make) => {
@@ -90,6 +98,14 @@ exports.isUsernameValid = (username) => {
 exports.isPasswordValid = (password) => {
     if (!password) { return false; }
     if (password.length < 8 || password.length > 128) {
+        return false;
+    }
+    return true;
+};
+
+exports.isTagValid = (tag) => {
+    if (!tag) { return false; }
+    if (tag.length < 1 || tag.length > 20) {
         return false;
     }
     return true;
