@@ -110,3 +110,21 @@ exports.isTagValid = (tag) => {
     }
     return true;
 };
+
+exports.isTitleValid = (title) => {
+    if (!title) { return false; }
+    if (title.length < 1 || title.length > 100) {
+        return false;
+    }
+    return true;
+};
+
+exports.mimeToImgFileExt = (mimeType) => {
+    let dict = {};
+    dict['image/bmp'] = '.bmp';
+    dict['image/gif'] = '.gif';
+    dict['image/jpeg'] = '.jpg';
+    dict['image/png'] = '.png';
+    dict['image/svg+xml'] = '.svg';
+    return dict[mimeType];
+};

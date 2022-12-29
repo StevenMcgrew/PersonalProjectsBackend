@@ -56,12 +56,12 @@ router.post('/signup', async (req, res, next) => {
 
         //Save new user
         const pq = new PQ({
-            text: `INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING id`,
+            text: `INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING id, username`,
             values: [email, username, hash]
         });
-        const recordId = await db.query(pq);
-        req.session.userId = recordId[0].id;
-        res.json(recordId[0]);
+        const records = await db.query(pq);
+        req.session.userId = records[0].id;
+        res.json({ username: records[0].username });
 
     } catch (err) {
         next(err);
@@ -120,6 +120,7 @@ router.delete('/logout', async (req, res, next) => {
 
 
 /*********************************************************************
-Export router
+Exports
 **********************************************************************/
-module.exports = router;
+exports.vehicleRepairsAuthRouter = router;
+exports.getUserBy = getUserBy;

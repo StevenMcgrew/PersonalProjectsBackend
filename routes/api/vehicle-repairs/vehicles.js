@@ -7,6 +7,40 @@ const PQ = pgp.ParameterizedQuery;
 
 
 /*********************************************************************
+Function to save vehicle
+**********************************************************************/
+const saveVehicle = async (year, make, model, engine) => {
+    try {
+        // Check if vehicle already exists
+        const pqGetVehicle = new PQ({
+            text: `SELECT id FROM vehicles WHERE
+                    year = $1 AND
+                    make = $2 AND
+                    model = $3 AND
+                    engine = $4 LIMIT 1`,
+            values: [year, make, model, engine]
+        });
+        const existingId = await db.query(pqGetVehicle);
+        if (existingId.length) {
+            return existingId[0].id;
+        }
+
+        // Save vehicle
+        const pqSaveVehicle = new PQ({
+            text: `INSERT INTO vehicles (year, make, model, engine)
+                    VALUES ($1, $2, $3, $4) RETURNING id`,
+            values: [year, make, model, engine]
+        });
+        const vehicleId = await db.query(pqSaveVehicle);
+        return vehicleId[0].id;
+
+    } catch (error) {
+        return error;
+    }
+};
+
+
+/*********************************************************************
 Create new vehicle. Request body:  { year, make, model, engine }
 **********************************************************************/
 router.post('', async (req, res, next) => {
@@ -22,12 +56,8 @@ router.post('', async (req, res, next) => {
         if (warning) { res.status(400).json({ warning }); return; }
 
         //Save new vehicle
-        const pq = new PQ({
-            text: `INSERT INTO vehicles (year, make, model, engine) VALUES ($1, $2, $3, $4) RETURNING id`,
-            values: [year, make, model, engine]
-        });
-        const recordId = await db.query(pq);
-        res.json(recordId[0]);
+        const vehicleId = await saveVehicle(year, make, model, engine);
+        res.json(vehicleId);
 
     } catch (error) {
         // TODO: handle db error for UNIQUE CONSTRAINT
@@ -51,4 +81,5 @@ router.post('', async (req, res, next) => {
 /*********************************************************************
 Export router
 **********************************************************************/
-module.exports = router;
+exports.vehicleRepairsVehiclesRouter = router;
+exports.saveVehicle = saveVehicle;

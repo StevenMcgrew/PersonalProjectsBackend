@@ -9,8 +9,12 @@ let cors = require('cors');
 // Import routes
 let indexRouter = require('./routes/index');
 const veCalculationsRouter = require('./routes/api/ve/calculations');
-const vehicleRepairsAuthRouter = require('./routes/api/vehicle-repairs/auth');
-const vehicleRepairsPostsRouter = require('./routes/api/vehicle-repairs/posts');
+const { vehicleRepairsAuthRouter } = require('./routes/api/vehicle-repairs/auth');
+const { vehicleRepairsImagesRouter } = require('./routes/api/vehicle-repairs/images');
+const { vehicleRepairsPostsTagsRouter } = require('./routes/api/vehicle-repairs/posts_tags');
+const { vehicleRepairsPostsRouter } = require('./routes/api/vehicle-repairs/posts');
+const { vehicleRepairsTagsRouter } = require('./routes/api/vehicle-repairs/tags');
+const { vehicleRepairsVehiclesRouter } = require('./routes/api/vehicle-repairs/vehicles');
 
 let app = express();
 
@@ -33,7 +37,11 @@ app.use(cookieSession({
 app.use('/', indexRouter);
 app.use('/api/ve/calculations', veCalculationsRouter);
 app.use('/api/vehicle-repairs/auth', vehicleRepairsAuthRouter);
+app.use('/api/vehicle-repairs/images', vehicleRepairsImagesRouter);
+app.use('/api/vehicle-repairs/posts_tags', vehicleRepairsPostsTagsRouter);
 app.use('/api/vehicle-repairs/posts', vehicleRepairsPostsRouter);
+app.use('api/vehicle-repairs/tags', vehicleRepairsTagsRouter);
+app.use('/api/vehicle-repairs/vehicles', vehicleRepairsVehiclesRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
