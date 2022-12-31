@@ -51,9 +51,11 @@ Create new post
 router.post('', async (req, res, next) => {
     try {
         // Check for signed in user
-        if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
+        // if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
 
-        const user_id = req.session.userId;
+        let user_id = 17;
+
+        // const user_id = req.session.userId;
         let {
             id,
             year,
@@ -113,24 +115,12 @@ router.post('', async (req, res, next) => {
         await savePostsTags(postId[0].id, tagIds);
 
         // Respond
-        res.json(postId[0]);
+        res.json({ id: postId[0].id });
 
     } catch (error) {
         next(error);
     }
 });
-
-
-/*********************************************************************
-
-**********************************************************************/
-// router.get('/', async (req, res, next) => {
-//     try {
-
-//     } catch (error) {
-//         next(error)
-//     }
-// });
 
 
 /*********************************************************************

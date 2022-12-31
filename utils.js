@@ -128,3 +128,5 @@ exports.mimeToImgFileExt = (mimeType) => {
     dict['image/svg+xml'] = '.svg';
     return dict[mimeType];
 };
+
+exports.rootDir = __dirname;

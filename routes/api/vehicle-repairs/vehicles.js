@@ -67,19 +67,7 @@ router.post('', async (req, res, next) => {
 
 
 /*********************************************************************
-
-**********************************************************************/
-// router.get('/', async (req, res, next) => {
-//     try {
-
-//     } catch (error) {
-//         next(error)
-//     }
-// });
-
-
-/*********************************************************************
-Export router
+Exports
 **********************************************************************/
 exports.vehicleRepairsVehiclesRouter = router;
 exports.saveVehicle = saveVehicle;
