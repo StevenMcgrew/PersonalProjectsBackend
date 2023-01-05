@@ -11,13 +11,14 @@ Function to save posts_tags
 **********************************************************************/
 const savePostsTags = async (postId, tagIds) => {
     try {
-        tagIds.forEach(async (tagId) => {
+        // Must use for...of loop because forEach() does not await promises
+        for (const tagId of tagIds) {
             const pq = new PQ({
                 text: `INSERT INTO posts_tags (post_id, tag_id) VALUES ($1, $2)`,
                 values: [postId, tagId]
             });
             await db.query(pq);
-        });
+        }
     } catch (error) {
         return error;
     }

@@ -46,6 +46,36 @@ router.get('/featured', async (req, res, next) => {
 
 
 /*********************************************************************
+Function to save post
+**********************************************************************/
+const savePost = async (id, title, steps, thumbnail, is_published, user_id, vehicle_id) => {
+    try {
+        let postId = null;
+        if (id) {
+            const pq = new PQ({
+                text: `UPDATE posts
+                        SET title = $1, steps = $2, thumbnail = $3, is_published = $4, user_id = $5, vehicle_id = $6
+                        WHERE id = $7 RETURNING id`,
+                values: [title, steps, thumbnail, is_published, user_id, vehicle_id, id]
+            });
+            postId = await db.query(pq);
+        }
+        else {
+            const pq = new PQ({
+                text: `INSERT INTO posts (title, steps, thumbnail, is_published, user_id, vehicle_id)
+                        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+                values: [title, steps, thumbnail, is_published, user_id, vehicle_id]
+            });
+            postId = await db.query(pq);
+        }
+        return postId[0].id;
+    } catch (error) {
+        return error;
+    }
+};
+
+
+/*********************************************************************
 Create new post
 **********************************************************************/
 router.post('', async (req, res, next) => {
@@ -92,30 +122,13 @@ router.post('', async (req, res, next) => {
         const tagIds = await saveTags(tags);
 
         // Save post
-        let postId = null;
-        if (id) {
-            const pq = new PQ({
-                text: `UPDATE posts
-                        SET title = $1, steps = $2, thumbnail = $3, is_published = $4, user_id = $5, vehicle_id = $6
-                        WHERE id = $7 RETURNING id`,
-                values: [title, steps, thumbnail, is_published, user_id, vehicle_id, id]
-            });
-            postId = await db.query(pq);
-        }
-        else {
-            const pq = new PQ({
-                text: `INSERT INTO posts (title, steps, thumbnail, is_published, user_id, vehicle_id)
-                        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-                values: [title, steps, thumbnail, is_published, user_id, vehicle_id]
-            });
-            postId = await db.query(pq);
-        }
+        const postId = await savePost(id, title, steps, thumbnail, is_published, user_id, vehicle_id);
 
         // Save posts_tags
-        await savePostsTags(postId[0].id, tagIds);
+        await savePostsTags(postId, tagIds);
 
         // Respond
-        res.json({ id: postId[0].id });
+        res.json({ id: postId });
 
     } catch (error) {
         next(error);
@@ -128,3 +141,4 @@ Exports
 **********************************************************************/
 exports.vehicleRepairsPostsRouter = router;
 exports.getPostBy = getPostBy;
+exports.savePost = savePost;

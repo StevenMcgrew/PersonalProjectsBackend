@@ -12,7 +12,9 @@ Function to save tags
 const saveTags = async (tags) => {
     try {
         let tagIds = [];
-        tags.forEach(async (tag) => {
+
+        // Must use for...of loop because forEach() does not await promises
+        for (const tag of tags) {
 
             // Check if tag already exists
             const pqGetTag = new PQ({
@@ -33,8 +35,9 @@ const saveTags = async (tags) => {
                 const newId = await db.query(pqSaveTag);
                 tagIds.push(newId[0].id);
             }
-        });
+        }
         return tagIds;
+
     } catch (error) {
         return error;
     }
