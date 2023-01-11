@@ -53,13 +53,13 @@ router.post('', async (req, res, next) => {
 
             // Update repair post
             let steps = JSON.parse(post.steps);
+            while (steps.length < stepNum) {
+                steps.push({ img: '', text: '' });
+            }
             steps[stepNum - 1].img = newFileName;
             await savePost(post.id, post.title, JSON.stringify(steps), post.thumbnail, post.is_published, post.user_id, post.vehicle_id);
 
             // Delete old image, if needed
-
-            console.log('OLDFILENAME:  ', oldFileName);
-
             if (oldFileName) {
                 const pathToOldFile = path.join(rootDir, 'public/repair-images/', oldFileName);
                 fs.unlink(pathToOldFile, (err) => {
