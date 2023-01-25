@@ -40,7 +40,7 @@ app.use('/api/vehicle-repairs/auth', vehicleRepairsAuthRouter);
 app.use('/api/vehicle-repairs/images', vehicleRepairsImagesRouter);
 app.use('/api/vehicle-repairs/posts_tags', vehicleRepairsPostsTagsRouter);
 app.use('/api/vehicle-repairs/posts', vehicleRepairsPostsRouter);
-app.use('api/vehicle-repairs/tags', vehicleRepairsTagsRouter);
+app.use('/api/vehicle-repairs/tags', vehicleRepairsTagsRouter);
 app.use('/api/vehicle-repairs/vehicles', vehicleRepairsVehiclesRouter);
 
 // catch 404 and forward to error handler

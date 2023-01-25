@@ -61,17 +61,54 @@ const savePost = async (id, title, steps, thumbnail, is_published, user_id, vehi
 
 
 /*********************************************************************
-Get featured posts
+Get posts. Filter options:  ?featured=true
 **********************************************************************/
-router.get('/featured', async (req, res, next) => {
+router.get('', async (req, res, next) => {
     try {
-        const queryString = `SELECT p.id, p.title, p.thumbnail, p.created_on, u.id, u.username, u.profile_pic
+        let queryString = '';
+
+        if (req.query.featured) {
+            queryString = `SELECT p.id, p.title, p.thumbnail, p.created_on, p.user_id,
+                                  u.username, u.profile_pic,
+                                  v.year, v.make, v.model, v.engine
                                 FROM posts p
-                                JOIN users u
-                                ON p.user_id = u.id
+                                JOIN users u ON p.user_id = u.id
+                                JOIN vehicles v ON p.vehicle_id = v.id
                                 WHERE p.is_featured = true`;
+        }
+        else {
+            queryString = `SELECT * FROM posts ORDER BY id DESC LIMIT 100`;
+        }
         const arr = await db.query(queryString);
-        return arr;
+        res.json(arr);
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+/*********************************************************************
+Get post by id
+**********************************************************************/
+router.get('/:id', async (req, res, next) => {
+    try {
+        const id = Math.round(req.params.id);
+
+        const pq = new PQ({
+            text: `SELECT p.title, p.steps, p.user_id, p.created_on, p.updated_on,
+                          u.username, u.profile_pic,
+                          v.year, v.make, v.model, v.engine
+                        FROM posts p
+                        JOIN users u ON p.user_id = u.id
+                        JOIN vehicles v ON p.vehicle_id = v.id
+                        WHERE p.id = $1`,
+            values: [id]
+        });
+        const arr = await db.query(pq);
+
+        if (!arr.length) { res.status(404).json({ warning: 'Repair data not found.' }); return; }
+
+        res.json(arr[0]);
     } catch (error) {
         next(error);
     }
@@ -84,11 +121,11 @@ Create new post
 router.post('', async (req, res, next) => {
     try {
         // Check for signed in user
-        // if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
+        if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
 
-        let user_id = 17;
+        // let user_id = 17;
 
-        // const user_id = req.session.userId;
+        const user_id = req.session.userId;
         let {
             id,
             year,
@@ -145,10 +182,10 @@ Delete a post
 router.delete('/:id', async (req, res, next) => {
     try {
         // Check for signed in user
-        // if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
-        // const user_id = req.session.userId;
+        if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
+        const user_id = req.session.userId;
 
-        let user_id = 17;
+        // let user_id = 17;
 
         // Get post
         let post = await getPostBy('id', req.params.id);

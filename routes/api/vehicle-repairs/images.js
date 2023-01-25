@@ -19,10 +19,10 @@ router.post('', async (req, res, next) => {
         let oldFileName;
 
         // Check for signed in user
-        // if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
-        // const user_id = req.session.userId;
+        if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
+        const user_id = req.session.userId;
 
-        let user_id = 17;
+        // let user_id = 17;
 
         // Get post
         let post = await getPostBy('id', postId);
@@ -89,10 +89,10 @@ router.delete('', async (req, res, next) => {
         const { postId, stepNum } = req.query;
 
         // Check for signed in user
-        // if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
-        // const user_id = req.session.userId;
+        if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
+        const user_id = req.session.userId;
 
-        let user_id = 17;
+        // let user_id = 17;
 
         // Get post
         let post = await getPostBy('id', postId);
