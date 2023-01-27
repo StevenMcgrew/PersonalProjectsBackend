@@ -61,7 +61,7 @@ const savePost = async (id, title, steps, thumbnail, is_published, user_id, vehi
 
 
 /*********************************************************************
-Get posts. Filter options:  ?featured=true
+Get posts. Filter options:  ?featured=true ?userId=123
 **********************************************************************/
 router.get('', async (req, res, next) => {
     try {
@@ -76,9 +76,17 @@ router.get('', async (req, res, next) => {
                                 JOIN vehicles v ON p.vehicle_id = v.id
                                 WHERE p.is_featured = true`;
         }
+        else if (req.query.userId) {
+            queryString = `SELECT p.id, p.title, p.thumbnail, p.created_on, p.user_id,
+                                  v.year, v.make, v.model, v.engine
+                                FROM posts p
+                                JOIN vehicles v ON p.vehicle_id = v.id
+                                WHERE p.user_id = ${req.query.userId}`;
+        }
         else {
             queryString = `SELECT * FROM posts ORDER BY id DESC LIMIT 100`;
         }
+
         const arr = await db.query(queryString);
         res.json(arr);
     } catch (error) {

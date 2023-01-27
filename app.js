@@ -15,6 +15,7 @@ const { vehicleRepairsPostsTagsRouter } = require('./routes/api/vehicle-repairs/
 const { vehicleRepairsPostsRouter } = require('./routes/api/vehicle-repairs/posts');
 const { vehicleRepairsTagsRouter } = require('./routes/api/vehicle-repairs/tags');
 const { vehicleRepairsVehiclesRouter } = require('./routes/api/vehicle-repairs/vehicles');
+const { vehicleRepairsUsersRouter } = require('./routes/api/vehicle-repairs/users');
 
 let app = express();
 
@@ -42,6 +43,7 @@ app.use('/api/vehicle-repairs/posts_tags', vehicleRepairsPostsTagsRouter);
 app.use('/api/vehicle-repairs/posts', vehicleRepairsPostsRouter);
 app.use('/api/vehicle-repairs/tags', vehicleRepairsTagsRouter);
 app.use('/api/vehicle-repairs/vehicles', vehicleRepairsVehiclesRouter);
+app.use('/api/vehicle-repairs/users', vehicleRepairsUsersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
