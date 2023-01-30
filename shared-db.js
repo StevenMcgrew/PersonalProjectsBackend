@@ -10,7 +10,6 @@ if (process.env.NODE_ENV === 'development') {
 } else {
     veConn = process.env.PROD_DB_BASE_URL + 've';
 }
-console.log(typeof ('TYPE: ', veConn));
 console.log('CONN: ', veConn);
 const veDB = pgp(veConn);
 exports.veDatabase = { db: veDB, pgp };
@@ -25,7 +24,6 @@ if (process.env.NODE_ENV === 'development') {
 } else {
     vehicleRepairsConn = process.env.PROD_DB_BASE_URL + 'vehicle_repairs';
 }
-console.log(typeof ('TYPE: ', vehicleRepairsConn));
 console.log('CONN: ', vehicleRepairsConn);
 const vehicleRepairsDB = pgp(vehicleRepairsConn);
 exports.vehicleRepairsDatabase = { db: vehicleRepairsDB, pgp };

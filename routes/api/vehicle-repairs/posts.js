@@ -77,7 +77,7 @@ router.get('', async (req, res, next) => {
                                 WHERE p.is_featured = true`;
         }
         else if (req.query.userId) {
-            queryString = `SELECT p.id, p.title, p.thumbnail, p.created_on, p.user_id,
+            queryString = `SELECT p.id, p.title, p.thumbnail, p.created_on,
                                   v.year, v.make, v.model, v.engine
                                 FROM posts p
                                 JOIN vehicles v ON p.vehicle_id = v.id
