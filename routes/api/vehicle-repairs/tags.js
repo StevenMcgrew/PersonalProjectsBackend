@@ -13,7 +13,7 @@ const saveTags = async (tags) => {
     try {
         let tagIds = [];
 
-        // Must use for...of loop because forEach() does not await promises
+        // Must use 'for...of' loop because forEach() does not await promises
         for (const tag of tags) {
 
             // Check if tag already exists
@@ -70,18 +70,6 @@ router.post('', async (req, res, next) => {
         next(error);
     }
 });
-
-
-/*********************************************************************
-
-**********************************************************************/
-// router.get('/', async (req, res, next) => {
-//     try {
-
-//     } catch (error) {
-//         next(error)
-//     }
-// });
 
 
 /*********************************************************************

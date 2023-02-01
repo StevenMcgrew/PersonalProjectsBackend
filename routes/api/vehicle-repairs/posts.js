@@ -35,7 +35,7 @@ Function to save post
 **********************************************************************/
 const savePost = async (id, title, steps, thumbnail, is_published, user_id, vehicle_id) => {
     try {
-        let postId = null;
+        let postId;
         if (id) {
             const pq = new PQ({
                 text: `UPDATE posts
@@ -131,8 +131,6 @@ router.post('', async (req, res, next) => {
         // Check for signed in user
         if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
 
-        // let user_id = 17;
-
         const user_id = req.session.userId;
         let {
             id,
@@ -192,8 +190,6 @@ router.delete('/:id', async (req, res, next) => {
         // Check for signed in user
         if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
         const user_id = req.session.userId;
-
-        // let user_id = 17;
 
         // Get post
         let post = await getPostBy('id', req.params.id);

@@ -22,8 +22,6 @@ router.post('', async (req, res, next) => {
         if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
         const user_id = req.session.userId;
 
-        // let user_id = 17;
-
         // Get post
         let post = await getPostBy('id', postId);
         if (!post) { res.status(400).json({ warning: 'Error saving image. Could not find post.' }); return; }
@@ -91,8 +89,6 @@ router.delete('', async (req, res, next) => {
         // Check for signed in user
         if (!req.session.userId) { res.status(400).json({ warning: 'Must be signed in.' }); return; }
         const user_id = req.session.userId;
-
-        // let user_id = 17;
 
         // Get post
         let post = await getPostBy('id', postId);

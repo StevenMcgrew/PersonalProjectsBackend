@@ -23,7 +23,15 @@ let app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-app.use(cors());
+// Setup CORS options
+var corsOptions = {
+    origin: ['http://localhost:5173'],
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    credentials: true,
+    exposedHeaders: ["set-cookie"],
+};
+
+app.use(cors(corsOptions));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -31,7 +39,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieSession({
     secret: process.env.SESSION_SECRET,
     maxAge: 34560000 * 1000, // 400 days (The draft of rfc6265bis now contains an upper limit of 400 days)
-    httpOnly: true
+    httpOnly: true,
+    secure: false
 }));
 
 // Register routes
