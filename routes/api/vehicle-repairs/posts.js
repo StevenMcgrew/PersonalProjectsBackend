@@ -74,14 +74,16 @@ router.get('', async (req, res, next) => {
                                 FROM posts p
                                 JOIN users u ON p.user_id = u.id
                                 JOIN vehicles v ON p.vehicle_id = v.id
-                                WHERE p.is_featured = true`;
+                                WHERE p.is_featured = true
+                                ORDER BY p.id DESC`;
         }
         else if (req.query.userId) {
             queryString = `SELECT p.id, p.title, p.thumbnail, p.created_on,
                                   v.year, v.make, v.model, v.engine
                                 FROM posts p
                                 JOIN vehicles v ON p.vehicle_id = v.id
-                                WHERE p.user_id = ${req.query.userId}`;
+                                WHERE p.user_id = ${req.query.userId}
+                                ORDER BY p.id DESC`;
         }
         else {
             queryString = `SELECT * FROM posts ORDER BY id DESC LIMIT 100`;
