@@ -38,7 +38,7 @@ CREATE TABLE vehicles (
 
 CREATE TABLE posts_tags (
     post_id INT NOT NULL,
-    tag_id INT NOT NULL,
+    tag_id INT NOT NULL
 );
 
 CREATE TABLE tags (
@@ -67,4 +67,4 @@ ALTER TABLE ONLY posts_tags ADD CONSTRAINT fk_posts_tags_posts FOREIGN KEY (post
 ALTER TABLE ONLY posts_tags ADD CONSTRAINT fk_posts_tags_tags FOREIGN KEY (tag_id) REFERENCES tags(id);
 
 -- UNIQUE rows for posts_tags
-ALTER TABLE posts_tags ADD CONSTRAINT unique_rows_posts_tags UNIQUE (post_id, tag_id)
+ALTER TABLE posts_tags ADD CONSTRAINT unique_rows_posts_tags UNIQUE (post_id, tag_id);
